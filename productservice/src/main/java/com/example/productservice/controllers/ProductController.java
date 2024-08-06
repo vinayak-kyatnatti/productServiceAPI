@@ -1,11 +1,13 @@
 package com.example.productservice.controllers;
 
-import com.example.productservice.dtos.CreateProductRequestDto;
-import com.example.productservice.dtos.CreateProductResponseDto;
+import com.example.productservice.dtos.products.*;
 import com.example.productservice.models.Product;
 import com.example.productservice.services.ProductService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/products")
@@ -28,8 +30,18 @@ public class ProductController {
     }
 
     @GetMapping("/")
-    public void getAllProducts(){
-        // Implementation code here
+    public GetAllProductResponseDto getAllProducts(){
+        List<Product> products=productService.getAllProducts();
+        GetAllProductResponseDto response=new GetAllProductResponseDto();
+
+
+        List<GetProductDto> getProductResponseDtos=new ArrayList<>();
+
+        for(Product product:products){
+            getProductResponseDtos.add(GetProductDto.from(product));
+        }
+        response.setProducts(getProductResponseDtos);
+       return response;
     }
 
     @GetMapping("/{id}")
@@ -42,12 +54,22 @@ public class ProductController {
         // Implementation code here
     }
 
-    public void updateProduct(){}
+    @PatchMapping("/{id}")
+    public PatchProductResponseDto updateProduct(@PathVariable("id")Long productId,@RequestBody CreateProductDto productDto){
+        Product product=productService.partialUpdateProduct(
+                productId,productDto.toProduct()
+        );
+        PatchProductResponseDto response=new PatchProductResponseDto();
+        response.setProduct(GetProductDto.from(product));
+        return response;
+    }
 
+    @PutMapping("")
     public void replaceProduct(){}
 
     @GetMapping("/magic")
     public String manisi(){
         return "magic";
     }
+
 }
